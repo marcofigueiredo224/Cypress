@@ -1,0 +1,178 @@
+/// <reference types="cypress" />
+context('Dev Finances Aiglizei', () => {
+  beforeEach(() =>{
+    cy.visit('https://dev-finance.netlify.app/');
+  })
+  it('Validar tela Nova Transação', () =>{
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada123+-*/.,!@#$%¨&*()_+{}`^:><|"')
+    // Click "Salvar" 
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se a Mensagem de ERRO aparece
+    cy.on('window:alert', function(alertMessage){ 
+      expect(alertMessage).to.contains
+      ('Por favor, preencha todos os campos corretamente')
+    })
+    // Apaga o valor do campo Descrição
+    cy.get('#description').clear() 
+    // Verifica se o valor foi apagado corretamente
+    cy.get('#description').should('have.value', '')
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(12755, +'adwdw')
+     // Verifica se apenas os valores númericos foram digitados
+    cy.get('[name=amount]').should('have.value', 12755)
+    // Click Salvar
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se a Mensagem de ERRO aparece
+    cy.on('window:alert', function(alertMessage){ 
+      expect(alertMessage).to.contains
+      ('Por favor, preencha todos os campos corretamente')
+    })
+    // Apaga o campo Valor
+    cy.get('[name=amount]').clear()
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2020-03-01') 
+    // Click Salvar
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se a Mensagem de ERRO aparece
+    cy.on('window:alert', function(alertMessage){ 
+      expect(alertMessage).to.contains
+      ('Por favor, preencha todos os campos corretamente')
+    })
+    // Apaga o campo Data
+    cy.get('[type=date]').clear()
+    // Verifica se o valor foi apagado corretamente
+    cy.get('[type=date]').should('have.value', '')
+    // Click Cancelar
+    cy.get('[class="button cancel"]').click()
+  })
+  it('Validar entradas com Sucesso', () => {
+      // Click "Nova Transação"
+      cy.get('#transaction .button').click() 
+      // Input no campo "Descrição"
+      cy.get('#description').type('Mesada') 
+      // Input no campo "Valor"
+      cy.get('[name=amount]').type(12) 
+      // Input no campo "Data"
+      cy.get('[type=date]').type('2023-02-17') 
+      // Click "Salvar"
+      cy.get('button').contains('Salvar').click() 
+      // Verifica quantidade de transações
+      cy.get('#data-table tbody tr').should('have.length', 1) 
+    })
+      
+  it('Validar entradas com Falha', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type("99") 
+    // Click "Salvar"
+    cy.get('button').contains('Salvar').click() 
+     // Verifica se a Mensagem de ERRO aparece
+    cy.on('window:alert', function(alertMessage){
+      expect(alertMessage).to.contains
+      ('Por favor, preencha todos os campos corretamente')
+    })
+  })
+  it('Validar saidas com Sucesso', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Presente') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(-12) 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17') 
+    // Click "Salvar"
+    cy.get('button').contains('Salvar').click() 
+    // Verifica quantidade de transações
+    cy.get('#data-table tbody tr').should('have.length', 1) 
+  })
+  it('Validar saidas com Falha', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Presente') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(-57) 
+    // Click "Salvar"
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se a Mensagem de ERRO aparece
+    cy.on('window:alert', function(alertMessage){ 
+      expect(alertMessage).to.contains
+      ('Por favor, preencha todos os campos corretamente')
+    })
+
+  })
+  it('Remover transações', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type("99") 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17')
+    // Click "Salvar" 
+    cy.get('button').contains('Salvar').click() 
+    // Remove a transação
+    cy.get('[onclick="Transaction.remove(0)"]').click() 
+    cy.get('#data-table tbody tr').should('have.length', 0)
+  })
+  it('Validar saldo entradas', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type("99") 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17')
+    // Click "Salvar" 
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se o saldo está de acordo com a entrada feita
+    cy.get('[id = incomeDisplay]').contains(99).should('be.visible')
+  })
+  it('Validar saldo saida', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(-99) 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17')
+    // Click "Salvar" 
+    cy.get('button').contains('Salvar').click()
+    // Verifica se o saldo está de acordo com a saída feita
+    cy.get('[id="expenseDisplay"]').contains(99).should('be.visible')
+  })
+  it('Validar saldo total', () => {
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Mesada') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(99) 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17')
+    // Click "Salvar" 
+    cy.get('button').contains('Salvar').click()
+    // Click "Nova Transação"
+    cy.get('#transaction .button').click() 
+    // Input no campo "Descrição"
+    cy.get('#description').type('Presente') 
+    // Input no campo "Valor"
+    cy.get('[name=amount]').type(-12) 
+    // Input no campo "Data"
+    cy.get('[type=date]').type('2023-02-17') 
+    // Click "Salvar"
+    cy.get('button').contains('Salvar').click() 
+    // Verifica se o saldo está de acordo com a saída feita
+    cy.get('[id="totalDisplay"]').contains(87).should('be.visible')
+  })
+});
